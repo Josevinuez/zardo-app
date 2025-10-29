@@ -8,21 +8,18 @@ import { createPublicApiRouter, createProtectedApiRouter } from "./routes/api.js
 import { webhookHandlers } from "./webhooks.js";
 
 const PORT = Number(process.env.BACKEND_PORT || process.env.PORT || 3000);
-const STATIC_DIR = path.resolve(process.cwd(), "dist", "client");
+const clientBuildDir = process.env.CLIENT_BUILD_DIR ?? "build/client";
+const STATIC_DIR = path.resolve(process.cwd(), clientBuildDir);
 
-// Development bypass - remove this in production
-const isDevelopment = 
-  process.env.NODE_ENV === 'development' || 
-  process.env.SHOPIFY_APP_URL?.includes('localhost') ||
-  process.env.SHOPIFY_APP_URL?.includes('127.0.0.1') ||
-  process.env.SHOPIFY_APP_URL?.includes('trycloudflare.com') ||
-  process.env.SHOPIFY_APP_URL?.includes('loca.lt');
+const allowAuthBypass = process.env.ALLOW_DEV_AUTH_BYPASS === "true";
+const validateAuthenticatedSession = shopify.validateAuthenticatedSession();
+const ensureInstalledOnShop = shopify.ensureInstalledOnShop();
 
 console.log("🚀 Starting Express server...");
 console.log("📁 Static dir:", STATIC_DIR);
 console.log("🔑 API Key:", process.env.SHOPIFY_API_KEY ? "SET" : "MISSING");
 console.log("🔐 Secret:", process.env.SHOPIFY_API_SECRET ? "SET" : "MISSING");
-console.log("🔧 Development mode:", isDevelopment ? "ENABLED" : "DISABLED");
+console.log(`🔧 Auth bypass: ${allowAuthBypass ? "ENABLED (ALLOW_DEV_AUTH_BYPASS=true)" : "DISABLED"}`);
 
 const app = express();
 
@@ -91,15 +88,15 @@ if (Object.keys(webhookHandlers).length > 0) {
 
 app.use("/api", createPublicApiRouter(shopify));
 
-// Development bypass for protected API routes
-app.use(
-  "/api",
-  isDevelopment ? (req, res, next) => {
-    console.log("🔓 Dev mode: bypassing auth check for API");
-    next();
-  } : shopify.validateAuthenticatedSession(),
-  createProtectedApiRouter(shopify),
-);
+// Protected API routes - supports explicit bypass via env flag
+app.use("/api", (req, res, next) => {
+  if (allowAuthBypass) {
+    console.log("🔓 Explicit auth bypass enabled for API access");
+    return next();
+  }
+
+  return validateAuthenticatedSession(req, res, next);
+}, createProtectedApiRouter(shopify));
 
 app.use(
   "/assets",
@@ -127,15 +124,20 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("*", isDevelopment ? (req, res, next) => {
-  console.log("🔓 Dev mode: bypassing auth check");
-  next();
-} : shopify.ensureInstalledOnShop(), (req, res, next) => {
+// App UI entry point - ensure the app is installed unless bypass is explicitly enabled
+app.get("*", (req, res, next) => {
+  if (allowAuthBypass) {
+    console.log("🔓 Explicit auth bypass enabled for app install check");
+    return next();
+  }
+
+  return ensureInstalledOnShop(req, res, next);
+}, (req, res, next) => {
   const indexPath = path.join(STATIC_DIR, "index.html");
   res.sendFile(indexPath, (error) => {
     if (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        res.status(200).send("<html><body><h1>Client build missing</h1><p>Run <code>npm run build:client</code> before starting the server.</p></body></html>");
+        res.status(200).send("<html><body><h1>Client build missing</h1><p>Run <code>npm run build</code> before starting the server.</p></body></html>");
         return;
       }
       next(error);

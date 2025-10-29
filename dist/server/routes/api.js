@@ -869,7 +869,11 @@ export function createProtectedApiRouter(shopify) {
                         session = fallbackSession;
                     }
                     else {
-                        return res.status(500).json({ error: "Could not get admin context - please install the app on this store first" });
+                        return res.status(500).json({
+                            error: "Could not get admin context",
+                            message: "Please install the app on this store first. Go to: https://zardo-plus.myshopify.com/admin/apps and install 'zardo-app-v2'",
+                            shop: shop
+                        });
                     }
                 }
                 else {

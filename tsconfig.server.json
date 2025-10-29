@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,
-    "outDir": "dist/server",
+    "outDir": "build/server",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
@@ -39,6 +39,7 @@
   ],
   "exclude": [
     "dist",
+    "build",
     "node_modules",
     "src"
   ]

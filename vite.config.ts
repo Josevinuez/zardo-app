@@ -16,6 +16,7 @@ const host = parsedUrl.hostname;
 const isLocalhost = host === "localhost";
 const frontendPort = Number(process.env.FRONTEND_PORT || parsedUrl.port || 5173);
 const backendPort = Number(process.env.BACKEND_PORT || process.env.API_PORT || 3000);
+const clientBuildDir = process.env.CLIENT_BUILD_DIR ?? "build/client";
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
@@ -61,7 +62,7 @@ export default defineConfig({
     }),
   },
   build: {
-    outDir: "dist/client",
+    outDir: clientBuildDir,
     emptyOutDir: false,
     manifest: true,
     assetsInlineLimit: 0,

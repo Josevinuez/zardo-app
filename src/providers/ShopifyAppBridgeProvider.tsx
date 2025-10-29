@@ -20,16 +20,7 @@ export function ShopifyAppBridgeProvider({ children }: PropsWithChildren) {
   const location = useLocation();
   const [host, setHost] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
-    
-    // In development, allow bypassing host requirement
-    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isDev) {
-      // Generate a mock host for development
-      const mockHost = sessionStorage.getItem(HOST_STORAGE_KEY) || btoa('zardotest.myshopify.com.admin');
-      sessionStorage.setItem(HOST_STORAGE_KEY, mockHost);
-      return mockHost;
-    }
-    
+
     const fromUrl = resolveHost(window.location.search);
     if (fromUrl) {
       sessionStorage.setItem(HOST_STORAGE_KEY, fromUrl);
@@ -37,6 +28,7 @@ export function ShopifyAppBridgeProvider({ children }: PropsWithChildren) {
     }
     return sessionStorage.getItem(HOST_STORAGE_KEY);
   });
+  const [missingHost, setMissingHost] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -44,7 +36,18 @@ export function ShopifyAppBridgeProvider({ children }: PropsWithChildren) {
     if (fromUrl && fromUrl !== host) {
       sessionStorage.setItem(HOST_STORAGE_KEY, fromUrl);
       setHost(fromUrl);
+      setMissingHost(false);
+      return;
     }
+    const stored = sessionStorage.getItem(HOST_STORAGE_KEY);
+    if (stored) {
+      if (stored !== host) {
+        setHost(stored);
+      }
+      setMissingHost(false);
+      return;
+    }
+    setMissingHost(true);
   }, [location.search, host]);
 
   const value = useMemo<ShopifyRuntimeConfig | null>(() => {
@@ -56,6 +59,29 @@ export function ShopifyAppBridgeProvider({ children }: PropsWithChildren) {
   }, [host]);
 
   if (!value) {
+    if (missingHost) {
+      return (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            height: "100vh",
+            gap: "0.75rem",
+            textAlign: "center",
+            padding: "1.5rem",
+          }}
+        >
+          <h1 style={{ margin: 0, fontSize: "1.5rem" }}>Missing Shopify context</h1>
+          <p style={{ margin: 0, maxWidth: 420 }}>
+            We could not determine the `host` parameter for the embedded app.
+            Please relaunch the app from your Shopify admin so it can load in the correct context.
+          </p>
+        </div>
+      );
+    }
+
     return <FullScreenSpinner label="Preparing Shopify context" />;
   }
 

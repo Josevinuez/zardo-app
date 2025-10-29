@@ -23,6 +23,23 @@ export default reactExtension(
   () => <Wishlist />,
 );
 
+const apiBaseUrl = (() => {
+  const env =
+    typeof process !== 'undefined' && process.env
+      ? (process.env as Record<string, string | undefined>)
+      : undefined;
+  const fromEnv =
+    env?.WISHLIST_API_BASE_URL ??
+    env?.SHOPIFY_APP_URL ??
+    env?.APP_URL;
+  if (fromEnv && fromEnv.length > 0) {
+    return fromEnv.replace(/\/$/, '');
+  }
+  return 'http://localhost:3000';
+})();
+
+const wishlistEndpoint = `${apiBaseUrl}/api/wishlist`;
+
 interface Keyword {
   id: string;
   value: string;
@@ -58,6 +75,7 @@ function Wishlist() {
   const { authenticatedAccount } = useApi()
   const translate = useTranslate();
   const corsHeader = {
+    'Content-Type': 'application/json',
   }
   const customer_id = authenticatedAccount.customer.current.id
   const [uiControl, setUIControl] = useState<UIControl>({
@@ -87,7 +105,7 @@ function Wishlist() {
       })
 
       const response = await fetch(
-        `https://zardomasterpanel.xyz/api/wishlist?id=${encodeURI(customer_id)}`,
+        `${wishlistEndpoint}?id=${encodeURI(customer_id)}`,
         {
           mode: "cors",
           headers: corsHeader
@@ -118,7 +136,7 @@ function Wishlist() {
       })
 
       const response = await fetch(
-        `https://zardomasterpanel.xyz/api/wishlist`, {
+        wishlistEndpoint, {
         method: 'POST',
         body: JSON.stringify({
           id: customer_id,
@@ -161,7 +179,7 @@ function Wishlist() {
         }
       })
       const response = await fetch(
-        `https://zardomasterpanel.xyz/api/wishlist`, {
+        wishlistEndpoint, {
         method: 'POST',
         body: JSON.stringify({
           id: customer_id,
@@ -193,7 +211,7 @@ function Wishlist() {
         }
       })
       const response = await fetch(
-        `https://zardomasterpanel.xyz/api/wishlist`, {
+        wishlistEndpoint, {
         method: 'POST',
         body: JSON.stringify({
           id: customer_id,
@@ -224,7 +242,7 @@ function Wishlist() {
         }
       })
       const response = await fetch(
-        `https://zardomasterpanel.xyz/api/wishlist`, {
+        wishlistEndpoint, {
         method: 'POST',
         body: JSON.stringify({
           id: customer_id,
