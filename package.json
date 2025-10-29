@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "npm run build:client && npm run build:server",
-    "build:client": "vite build",
+    "build:client": "node ./scripts/build-client.mjs",
     "build:server": "tsc -p tsconfig.server.json",
     "dev": "concurrently --raw --kill-others \"npm:dev:server\" \"npm:dev:client\"",
     "dev:local": "npm run shopify -- app dev --use-localhost",
