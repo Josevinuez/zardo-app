@@ -1,0 +1,17 @@
+{
+  "loading": "Chargement...",
+  "not-found": "Ressource non trouvée",
+  "suggested-keywords": "Mots-clés suggérés",
+  "email-card": {
+    "label": "Email",
+    "save-button": "Sauvegarder l'email",
+    "unsubscribe-button": "Se désinscrire"
+  },
+  "keyword-card": {
+    "text1": "Recevez des e-mails instantanés lorsque un certain produit est en stock !",
+    "text2": "Ajoutez ou supprimez des mots-clés de votre liste de souhaits par e-mail ci-dessous.",
+    "placeholder": "Entrez votre mot-clé ici",
+    "add-button": "Ajouter un mot-clé",
+    "min-chars": "Minimum 3 caractères requis"
+  }
+}

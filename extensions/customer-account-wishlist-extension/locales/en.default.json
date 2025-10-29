@@ -1,0 +1,17 @@
+{
+  "loading": "Loading...",
+  "not-found": "Resource Not found",
+  "suggested-keywords": "Suggested keywords",
+  "email-card": {
+    "label": "Email",
+    "save-button": "Save Email",
+    "unsubscribe-button": "Unsubscribe"
+  },
+  "keyword-card": {
+    "text1": "Receive instant emails when a certain product is in stock !",
+    "text2": "Add or remove keywords from your email wishlist down below.",
+    "placeholder": "Enter your keyword here",
+    "add-button": "Add keyword",
+    "min-chars": "Minimum 3 characters required"
+  }
+}

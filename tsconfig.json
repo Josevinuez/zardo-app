@@ -1,0 +1,45 @@
+{
+  "include": [
+    "env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "server/**/*.ts",
+    "trigger/trigger.config.ts",
+    "trigger/.troll.tasks.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "strict": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "removeComments": false,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@server/*": [
+        "./server/*"
+      ],
+      "~/*": [
+        "./src/*"
+      ]
+    },
+    "types": [
+      "node"
+    ]
+  }
+}

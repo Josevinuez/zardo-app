@@ -1,0 +1,45 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist/server",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "target": "ES2022",
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": [
+        "./src/*",
+        "./server/*"
+      ],
+      "~/*": [
+        "./server/services/*"
+      ],
+      "@server/*": [
+        "./server/*"
+      ],
+      "@shopify/shopify-app-remix/server": [
+        "./types/shopify-remix.d.ts"
+      ],
+      "~/db.server": [
+        "./server/db.ts"
+      ],
+      "~/modules/*": [
+        "./app/modules/*"
+      ]
+    }
+  },
+  "include": [
+    "server/**/*.ts",
+    "server/**/*.tsx"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src"
+  ]
+}

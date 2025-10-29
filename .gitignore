@@ -1,0 +1,44 @@
+node_modules
+
+/.cache
+/build
+/app/build
+/public/build/
+/public/_dev
+/app/public/build
+/prisma/dev.sqlite
+/prisma/dev.sqlite-journal
+database.sqlite
+
+.env
+.env.local
+
+/extensions/*/dist
+
+bun.lockb
+package-lock.json
+shopify.app.toml
+
+.trigger
+
+trigger.config.ts
+
+/templates/*.html# Secrets / env
+.env
+*.env
+# PM2 config (often contains env/secrets)
+ecosystem.config.js
+
+# Build/runtime
+build/
+node_modules/
+
+# Local/prod data (SQLite)
+prisma/*.sqlite
+
+# Logs
+*.log
+pm2*.log
+
+# Any env variants
+.env*

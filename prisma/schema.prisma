@@ -1,0 +1,244 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+  binaryTargets   = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+model Analytics {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  value     Float
+  createdAt DateTime @default(now())
+}
+
+model NotificationResult {
+  id        Int      @id @default(autoincrement())
+  title     String
+  length    Int
+  createdAt DateTime @default(now())
+  type      String
+  shown     Boolean  @default(false)
+}
+
+model PSAResult {
+  id        Int      @id @default(autoincrement())
+  cardNo    Int
+  jobId     String   @unique
+  status    String   @default("In Queue")
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+model ActiveQueue {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  importIdentifier String   @unique
+}
+
+model Product {
+  id             String           @id
+  title          String
+  description    String
+  totalInventory Int
+  importLink     String?          @unique
+  status         String           @default("DRAFT")
+  EmailSent      EmailSent[]
+  variants       ProductVariant[]
+}
+
+model ProductVariant {
+  id                String  @id
+  title             String
+  price             Float
+  barcode           String?
+  sku               String?
+  inventoryQuantity Int
+  productId         String
+  product           Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model LastDownloadCleanup {
+  id   String   @id @default(uuid())
+  date DateTime @default(now())
+}
+
+model Wishlist {
+  id           String    @id @default(cuid())
+  email        String?   @unique
+  customerId   String    @unique
+  isValidEmail Boolean   @default(false)
+  Keywords     Keyword[] @relation("KeywordToWishlist")
+}
+
+model Keyword {
+  id        String     @id @default(cuid())
+  value     String     @unique
+  createdAt DateTime   @default(now())
+  Wishlists Wishlist[] @relation("KeywordToWishlist")
+
+  @@index([value], map: "value")
+}
+
+model SuggestedKeyword {
+  id        String   @id @default(cuid())
+  value     String   @unique
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@index([value])
+}
+
+model EmailSent {
+  id        String   @id
+  lastSent  DateTime @default(now())
+  productId String?
+  Product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model psa_limits {
+  id                BigInt   @id @default(autoincrement())
+  created_at        DateTime @default(now()) @db.Timestamptz(6)
+  key               String?
+  callsLeftForToday Int?
+}
+
+// Lot Tracking Models
+model Lot {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Purchase Info
+  purchaseDate      DateTime
+  totalCost         Float              // Renamed to "Lot Price" in UI
+  lotValue          Float?             // Estimated value of the lot
+  initialDebt       Float    @default(0)
+  
+  // Shipping Info
+  upsTrackingNumber String?
+  trackingStatus    String   @default("pending")          // UPS tracking status
+  shippingStatus    String   @default("pending_shipment") // Internal shipping status
+  estimatedDeliveryDate DateTime?                         // ETA date
+  
+  // Metadata
+  notes             String?
+  vendor            String?            // Renamed to "Seller Name" in UI
+  lotType           String?
+  googleSheetsLink  String?            // Link to Google Sheets for lot tracking
+  collectorLink     String?            // Link to collector database or pricing site
+  
+  // Conversion Status
+  isConverted       Boolean  @default(false)
+  convertedAt       DateTime?
+  
+  // Relations
+  trackingEvents    TrackingEvent[]
+  lotProducts       LotProduct[]
+  debtPayments      DebtPayment[]
+  
+  @@map("lots")
+}
+
+model TrackingEvent {
+  id               String   @id @default(cuid())
+  lotId            String
+  createdAt        DateTime @default(now())
+  
+  // UPS Event Data
+  eventType        String
+  eventDescription String?
+  eventDate        DateTime?
+  location         String?
+  
+  // Relations
+  lot              Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  
+  @@map("tracking_events")
+}
+
+model LotProduct {
+  id                String   @id @default(cuid())
+  lotId             String
+  createdAt         DateTime @default(now())
+  
+  // Product Info
+  productName       String
+  sku               String?
+  description       String?
+  estimatedQuantity Int      @default(1)
+  
+  // Conversion Status
+  isConverted       Boolean  @default(false)
+  shopifyProductId  String?
+  convertedAt       DateTime?
+  
+  // Relations
+  lot               Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  variants          LotProductVariant[]
+  
+  @@map("lot_products")
+}
+
+model LotProductVariant {
+  id                String   @id @default(cuid())
+  lotProductId      String
+  createdAt         DateTime @default(now())
+  
+  // Variant Info
+  variantName       String   // e.g., "Near Mint", "First Edition", "Shadowless"
+  condition         String?  // e.g., "Near Mint", "Lightly Played", "Heavily Played"
+  rarity            String?  // e.g., "Common", "Uncommon", "Rare", "Holo"
+  quantity          Int      @default(1)
+  estimatedValue    Float?   // Individual estimated value
+  
+  // Conversion Status
+  isConverted       Boolean  @default(false)
+  shopifyVariantId  String?
+  convertedAt       DateTime?
+  
+  // Relations
+  lotProduct        LotProduct @relation(fields: [lotProductId], references: [id], onDelete: Cascade)
+  
+  @@map("lot_product_variants")
+}
+
+model DebtPayment {
+  id                String   @id @default(cuid())
+  lotId             String
+  createdAt         DateTime @default(now())
+  
+  // Payment Info
+  paymentAmount     Float
+  paymentDate       DateTime @default(now())
+  paymentMethod     String?  // e.g., "Cash", "Credit Card", "Bank Transfer", "Check"
+  notes             String?
+  
+  // Relations
+  lot               Lot      @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  
+  @@map("debt_payments")
+}

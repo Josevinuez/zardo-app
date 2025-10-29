@@ -1,0 +1,35 @@
+.frame {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #dfe3e8;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.navLink {
+  color: #202223;
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navLink:hover {
+  background: #f0f1f6;
+}
+
+.navLinkActive {
+  background: #111826;
+  color: #ffffff;
+}
+
+.content {
+  padding: 1.5rem;
+}
