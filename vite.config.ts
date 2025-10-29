@@ -10,6 +10,10 @@ if (
   delete process.env.HOST;
 }
 
+if (!process.env.ROLLUP_SKIP_NODE_BINARY) {
+  process.env.ROLLUP_SKIP_NODE_BINARY = "1";
+}
+
 const appUrl = process.env.SHOPIFY_APP_URL || "http://localhost:5173";
 const parsedUrl = new URL(appUrl.startsWith("http") ? appUrl : `https://${appUrl}`);
 const host = parsedUrl.hostname;
